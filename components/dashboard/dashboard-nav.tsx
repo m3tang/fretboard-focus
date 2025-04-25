@@ -51,12 +51,10 @@ export function DashboardNav() {
   const [displayTime, setDisplayTime] = useState(elapsedSeconds);
 
   useEffect(() => {
-    if (!isActive || !session) return;
-    const interval = setInterval(() => {
-      setDisplayTime((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [isActive, session]);
+    if (isActive && session) {
+      setDisplayTime(elapsedSeconds);
+    }
+  }, [isActive, session, elapsedSeconds]);
 
   const cta =
     isActive && session

@@ -7,7 +7,7 @@ type PracticeSession = {
   duration: number; // in minutes
   modules: string[];
   startTime: number;
-  currentModuleIndex: number;
+  currentModIndex: number;
   timePerModule: number;
 };
 
