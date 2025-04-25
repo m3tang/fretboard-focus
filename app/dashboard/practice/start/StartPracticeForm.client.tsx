@@ -18,6 +18,7 @@ import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
 import { useRouter } from "next/navigation";
+import { nanoid } from "nanoid";
 
 const FormSchema = z.object({
   name: z.string().min(2, {
@@ -70,7 +71,7 @@ export function InputForm() {
     //   ),
     // });
 
-    const sessionId = crypto.randomUUID(); // or nanoid
+    const sessionId = nanoid();
 
     usePracticeStore.getState().setSession({
       id: sessionId,

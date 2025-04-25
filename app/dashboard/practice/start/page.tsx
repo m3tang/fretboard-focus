@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { InputForm } from "./StartPracticeForm";
+import { InputForm } from "./StartPracticeForm.client";
 
 export default function StartPracticePage() {
   return (
