@@ -38,13 +38,15 @@ export default function DashboardLayout({
             <MobileNav />
           </SheetContent>
         </Sheet>
-        <Link href="/" className="flex items-center gap-2 md:gap-3">
-          <GuitarIcon className="h-6 w-6" />
-          <span className="text-lg font-bold">Fretboard Focus</span>
-        </Link>
-        {/* <div className="ml-auto flex items-center gap-2">
-          <UserNav />
-        </div> */}
+        <div className="flex w-full flex-row justify-between items-center">
+          <div>
+            <Link href="/" className="flex items-center gap-2 md:gap-3">
+              <GuitarIcon className="h-6 w-6" />
+              <span className="text-lg font-bold">Fretboard Focus</span>
+            </Link>
+          </div>
+          <Link href="/dashboard/settings">Settings</Link>
+        </div>
       </header>
       <div className="flex-1 grid grid-cols-1 md:grid-cols-[220px_1fr]">
         <aside className="hidden md:block border-r px-4 py-6">

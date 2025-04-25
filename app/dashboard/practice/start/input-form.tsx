@@ -52,7 +52,7 @@ export function InputForm() {
     defaultValues: {
       name: "Practice #1",
       modules: modules.filter((m) => m !== "Sight Reading" && m !== "Improv"),
-      duration: "30",
+      duration: "60",
     },
   });
 
@@ -85,7 +85,7 @@ export function InputForm() {
                 <Input placeholder="Practice #1" {...field} />
               </FormControl>
               <FormDescription>
-                Used to identify prior sessions. Must be unique.
+                Name your session to help you track your practice history
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -98,25 +98,26 @@ export function InputForm() {
             <FormItem>
               <FormLabel>Duration</FormLabel>
 
-              {/* Number Input */}
-              <FormControl>
-                <Input
-                  type="number"
-                  inputMode="numeric"
-                  value={field.value ?? ""}
-                  onChange={field.onChange}
-                  placeholder="30"
-                  min={1}
-                  max={180}
-                />
-              </FormControl>
+              <div className="flex flex-row items-center gap-2">
+                <FormControl>
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    value={field.value ?? ""}
+                    onChange={field.onChange}
+                    placeholder="60"
+                    max={180}
+                    className="w-auto"
+                  />
+                </FormControl>
+                <FormDescription>minutes</FormDescription>
+              </div>
 
               {/* Slider */}
               <FormControl>
                 <Slider
                   max={180}
-                  min={1}
-                  step={1}
+                  step={5}
                   // Convert string -> number safely
                   value={[Number(field.value) || 1]}
                   onValueChange={(val) => field.onChange(String(val[0]))} // Convert number -> string
@@ -136,7 +137,7 @@ export function InputForm() {
             <FormItem>
               <FormLabel>Modules</FormLabel>
               <FormDescription>
-                Select one or more practice areas.
+                Select one or more practice areas
               </FormDescription>
               <FormControl>
                 <ToggleGroup
