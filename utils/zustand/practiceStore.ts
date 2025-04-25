@@ -1,14 +1,21 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Routine } from "@/types/routine";
+import { ModuleName } from "@/types/modules";
+import { nanoid } from "nanoid"; // for session id generation if needed
+
+type PracticeModule = {
+  module: ModuleName;
+  duration: number; // minutes
+};
 
 type PracticeSession = {
   id: string;
   name: string;
-  duration: number; // in minutes
-  modules: string[];
+  duration: number; // total minutes
+  modules: PracticeModule[];
   startTime: number;
   currentModuleIndex: number;
-  timePerModule: number;
 };
 
 type SessionStatus = "draft" | "preview" | "active" | "completed";
@@ -28,6 +35,7 @@ interface PracticeStore {
   resume: () => void;
   tick: () => void;
   finishModule: () => void;
+  loadRoutine: (routine: Routine) => void;
 
   currentModuleIndex: () => number;
   moduleProgress: (index: number) => number;
@@ -46,7 +54,7 @@ export const usePracticeStore = create<PracticeStore>()(
       setSession: (session) =>
         set({
           session,
-          status: "preview", // default next step after setting session
+          status: "preview",
           isActive: false,
           isPaused: false,
           elapsedSeconds: 0,
@@ -81,35 +89,78 @@ export const usePracticeStore = create<PracticeStore>()(
         const { session, elapsedSeconds } = get();
         if (!session) return;
 
-        const nextIndex = Math.min(
-          Math.floor(elapsedSeconds / (session.timePerModule * 60)) + 1,
-          session.modules.length - 1
+        const moduleDurationsInSeconds = session.modules.map(
+          (m) => m.duration * 60
+        );
+        let totalElapsed = 0;
+        for (let i = 0; i < moduleDurationsInSeconds.length; i++) {
+          totalElapsed += moduleDurationsInSeconds[i];
+          if (elapsedSeconds < totalElapsed) {
+            // Move to start of next module
+            const newElapsed = totalElapsed;
+            set({ elapsedSeconds: newElapsed, isPaused: true });
+            return;
+          }
+        }
+      },
+
+      loadRoutine: (routine) => {
+        const totalDuration = routine.modules.reduce(
+          (sum, m) => sum + m.duration,
+          0
         );
 
-        const newElapsed = nextIndex * session.timePerModule * 60;
-        set({ elapsedSeconds: newElapsed, isPaused: true });
+        const newSession: PracticeSession = {
+          id: nanoid(),
+          name: routine.name,
+          duration: totalDuration,
+          modules: routine.modules.map((m) => ({
+            module: m.module,
+            duration: m.duration,
+          })),
+          startTime: Date.now(),
+          currentModuleIndex: 0,
+        };
+
+        set({
+          session: newSession,
+          status: "preview",
+          isActive: false,
+          isPaused: false,
+          elapsedSeconds: 0,
+        });
       },
 
       currentModuleIndex: () => {
         const { session, elapsedSeconds } = get();
         if (!session) return 0;
-        return Math.min(
-          Math.floor(elapsedSeconds / (session.timePerModule * 60)),
-          session.modules.length - 1
-        );
+
+        let elapsed = 0;
+        for (let i = 0; i < session.modules.length; i++) {
+          const moduleTimeInSeconds = session.modules[i].duration * 60;
+          if (elapsedSeconds < elapsed + moduleTimeInSeconds) {
+            return i;
+          }
+          elapsed += moduleTimeInSeconds;
+        }
+        return session.modules.length - 1;
       },
 
       moduleProgress: (index) => {
         const { session, elapsedSeconds } = get();
         if (!session) return 0;
 
-        const start = index * session.timePerModule * 60;
-        const end = start + session.timePerModule * 60;
+        let elapsed = 0;
+        for (let i = 0; i < index; i++) {
+          elapsed += session.modules[i].duration * 60;
+        }
+        const moduleTime = session.modules[index].duration * 60;
+        const moduleElapsed = elapsedSeconds - elapsed;
 
-        if (elapsedSeconds >= end) return 100;
-        if (elapsedSeconds < start) return 0;
+        if (moduleElapsed >= moduleTime) return 100;
+        if (moduleElapsed <= 0) return 0;
 
-        return ((elapsedSeconds - start) / (session.timePerModule * 60)) * 100;
+        return (moduleElapsed / moduleTime) * 100;
       },
 
       overallProgress: () => {

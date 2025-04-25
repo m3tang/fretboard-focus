@@ -12,7 +12,7 @@ export default function SongsPage() {
   }, [initDefaultSongs]);
 
   return (
-    <div className="p-6">
+    <div>
       <DashboardHeader
         title="Songs"
         subtitle="Track the songs you're learning, want to learn, or have learned."

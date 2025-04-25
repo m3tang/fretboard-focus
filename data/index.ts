@@ -1,19 +1,17 @@
 import { seedExercises } from "./exercises/seedExercises";
+import { seedRoutines } from "./routines/seedRoutines";
 
 async function main() {
-  console.log("🌱 Starting full seeding process...");
-
   await seedExercises();
-
-  console.log("✅ All seeds completed.");
+  await seedRoutines();
 }
 
-// Actually run it
 main()
   .then(() => {
+    console.log("🌱 All seeds completed.");
     process.exit(0);
   })
-  .catch((err) => {
-    console.error("❌ Seeding failed:", err);
+  .catch((error) => {
+    console.error("❌ Seeding failed:", error);
     process.exit(1);
   });

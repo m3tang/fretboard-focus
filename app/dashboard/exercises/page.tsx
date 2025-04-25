@@ -7,7 +7,7 @@ export default async function DashboardExercisesPage() {
   const exercisesFromDb: Exercise[] = await fetchExercisesFromDb(); // server fetch
 
   return (
-    <div className="p-6">
+    <div>
       <DashboardHeader
         title="Exercise Library"
         subtitle="View and manage exercises used across your practice modules."

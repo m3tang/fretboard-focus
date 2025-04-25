@@ -17,9 +17,9 @@ export function PracticePreview() {
       <div>
         <h2 className="text-lg font-semibold">Modules</h2>
         <ul className="list-disc list-inside">
-          {session.modules.map((module) => (
-            <li key={module}>
-              {module} ({session.timePerModule} min)
+          {session.modules.map((moduleObj) => (
+            <li key={moduleObj.module}>
+              {moduleObj.module} ({moduleObj.duration} min)
             </li>
           ))}
         </ul>

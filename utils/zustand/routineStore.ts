@@ -3,7 +3,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Routine } from "@/types/routine";
-import { defaultRoutines } from "@/data/defaults/defaultRoutines"; // we'll make this next!
 
 interface RoutineStore {
   routines: Routine[];
@@ -12,7 +11,7 @@ interface RoutineStore {
   updateRoutine: (id: string, updates: Partial<Routine>) => void;
   deleteRoutine: (id: string) => void;
   getRoutineById: (id: string) => Routine | undefined;
-  initDefaultRoutines: () => void;
+  initDefaultRoutines: (routinesFromDb: Routine[]) => void; // accept routines
 }
 
 export const useRoutineStore = create<RoutineStore>()(
@@ -42,11 +41,11 @@ export const useRoutineStore = create<RoutineStore>()(
         return get().routines.find((routine) => routine.id === id);
       },
 
-      initDefaultRoutines: () => {
-        const { initialized, routines } = get();
-        if (!initialized && routines.length === 0) {
+      initDefaultRoutines: (routinesFromDb) => {
+        const { initialized } = get();
+        if (!initialized) {
           set({
-            routines: defaultRoutines,
+            routines: routinesFromDb,
             initialized: true,
           });
         }

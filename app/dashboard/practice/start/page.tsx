@@ -1,18 +1,36 @@
 "use client";
 
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
-import { InputForm } from "./input-form"; // your form component
-import { PracticePreview } from "./practice-preview"; // we'll make this next
+import { InputForm } from "./input-form";
+import { PracticePreview } from "./practice-preview";
 import { Card } from "@/components/ui/card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { RoutinePicker } from "./routine-picker"; // we'll build this
 
 function Content() {
   const { status } = usePracticeStore();
+
   if (status === "preview") {
     return <PracticePreview />;
   }
 
-  return <InputForm />;
+  return (
+    <Tabs defaultValue="custom" className="w-full">
+      <TabsList className="mb-4">
+        <TabsTrigger value="custom">Build Your Own</TabsTrigger>
+        <TabsTrigger value="routine">Your Routines</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="custom">
+        <InputForm />
+      </TabsContent>
+
+      <TabsContent value="routine">
+        <RoutinePicker />
+      </TabsContent>
+    </Tabs>
+  );
 }
 
 export default function PracticeStartPage() {
