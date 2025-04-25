@@ -2,7 +2,6 @@
 
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { GuitarIcon, Menu } from "lucide-react";

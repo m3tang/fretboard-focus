@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -34,9 +34,9 @@ export default function ActivePracticePage({
     overallProgress,
   } = usePracticeStore();
 
-  const handleFinish = () => {
+  const handleFinish = useCallback(() => {
     router.replace(`/dashboard/practice/summary/${id}`);
-  };
+  }, [id, router]);
 
   // Timer: ticks every second when not paused
   useEffect(() => {
@@ -50,7 +50,7 @@ export default function ActivePracticePage({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [session, tick, router]);
+  }, [session, tick, router, handleFinish]);
 
   if (!session) return null;
 

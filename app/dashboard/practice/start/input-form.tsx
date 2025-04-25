@@ -17,7 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
-import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
 
 const FormSchema = z.object({
@@ -48,8 +47,6 @@ const modules = [
 ];
 
 export function InputForm() {
-  const router = useRouter();
-
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
