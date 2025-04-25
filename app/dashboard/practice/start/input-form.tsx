@@ -60,17 +60,6 @@ export function InputForm() {
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    // toast({
-    //   title: "You submitted the following values:",
-    //   description: (
-    //     <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-    //       <code className="text-white">
-    //         {JSON.stringify(parsedData, null, 2)}
-    //       </code>
-    //     </pre>
-    //   ),
-    // });
-
     const sessionId = nanoid();
 
     usePracticeStore.getState().setSession({
@@ -83,7 +72,7 @@ export function InputForm() {
       startTime: Date.now(),
     });
 
-    router.push(`/dashboard/practice/active/${sessionId}`);
+    usePracticeStore.getState().setStatus("preview");
   }
 
   return (
@@ -182,7 +171,7 @@ export function InputForm() {
           )}
         />
 
-        <Button type="submit">Submit</Button>
+        <Button type="submit">Next</Button>
       </form>
     </Form>
   );

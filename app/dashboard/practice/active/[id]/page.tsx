@@ -4,12 +4,23 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Metronome from "@/components/Metronome";
 import { DialogTitle } from "@radix-ui/react-dialog";
+import { use } from "react";
 
-export default function ActivePracticePage() {
+export default function ActivePracticePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = use(params);
   const router = useRouter();
   const {
     session,
@@ -18,16 +29,19 @@ export default function ActivePracticePage() {
     tick,
     pause,
     resume,
-    endSession,
     currentModuleIndex,
     moduleProgress,
     overallProgress,
   } = usePracticeStore();
 
+  const handleFinish = () => {
+    router.replace(`/dashboard/practice/summary/${id}`);
+  };
+
   // Timer: ticks every second when not paused
   useEffect(() => {
     if (!session) {
-      router.replace("/dashboard");
+      handleFinish();
       return;
     }
 
@@ -45,44 +59,43 @@ export default function ActivePracticePage() {
   const currentModule = session.modules[currentIndex];
 
   if (isFinished) {
-    endSession();
-    router.replace("/dashboard");
+    handleFinish();
     return null;
   }
 
   return (
     <div className="p-6 w-full mx-auto space-y-6">
       {/* Header */}
-      <div>
-        <h2 className="text-3xl font-bold">{session.name}</h2>
-        <p className="text-muted-foreground text-sm">
-          {new Date().toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </p>
-        {/* Control buttons */}
-        <div className="flex gap-4 justify-center">
-          <Button
-            variant="outline"
-            onClick={() => (isPaused ? resume() : pause())}
-          >
-            {isPaused ? "Resume" : "Pause"}
-          </Button>
+      <div className="flex flex-row justify-between">
+        <div>
+          <h2 className="text-3xl font-bold">{session.name}</h2>
+          <p className="text-muted-foreground text-sm">
+            {new Date().toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </p>
         </div>
 
-        {/* End session */}
-        <div className="flex justify-center">
-          <Button
-            variant="ghost"
-            onClick={() => {
-              endSession();
-              router.replace("/dashboard");
-            }}
-          >
-            End Session
-          </Button>
+        {/* Control buttons */}
+        <div className="flex flex-row gap-3">
+          {/* Pause / Resume */}
+          <div className="flex gap-4 justify-center">
+            <Button
+              variant="outline"
+              onClick={() => (isPaused ? resume() : pause())}
+            >
+              {isPaused ? "Resume" : "Pause"}
+            </Button>
+          </div>
+
+          {/* End session */}
+          <div className="flex justify-center">
+            <Button variant="default" onClick={handleFinish}>
+              End Session
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -144,14 +157,15 @@ function SkipModuleButton() {
         <Button variant="secondary">Finish Module</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle>
-          <h3 className="text-lg font-semibold">Finish Module Early?</h3>
+        <DialogTitle className="text-lg font-semibold">
+          Finish Module Early?
         </DialogTitle>
 
-        <p className="text-sm text-muted-foreground mb-4">
+        <DialogDescription className="text-sm text-muted-foreground mb-4">
           Are you sure you want to end this module and move on? This will pause
           your session.
-        </p>
+        </DialogDescription>
+
         <div className="flex gap-2 justify-end">
           <Button variant="outline" onClick={() => setShowFinishConfirm(false)}>
             Cancel

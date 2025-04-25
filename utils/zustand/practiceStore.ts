@@ -7,17 +7,22 @@ type PracticeSession = {
   duration: number; // in minutes
   modules: string[];
   startTime: number;
-  currentModIndex: number;
+  currentModuleIndex: number;
   timePerModule: number;
 };
 
-type PracticeStore = {
+type SessionStatus = "draft" | "preview" | "active" | "completed";
+
+interface PracticeStore {
   session: PracticeSession | null;
+  status: SessionStatus;
   isActive: boolean;
   isPaused: boolean;
   elapsedSeconds: number;
 
-  setSession: (s: PracticeSession) => void;
+  setSession: (session: PracticeSession) => void;
+  setStatus: (status: SessionStatus) => void;
+  startSession: () => void;
   endSession: () => void;
   pause: () => void;
   resume: () => void;
@@ -27,27 +32,35 @@ type PracticeStore = {
   currentModuleIndex: () => number;
   moduleProgress: (index: number) => number;
   overallProgress: () => number;
-};
+}
 
 export const usePracticeStore = create<PracticeStore>()(
   persist(
     (set, get) => ({
       session: null,
+      status: "draft",
       isActive: false,
       isPaused: false,
       elapsedSeconds: 0,
 
-      setSession: (s) =>
+      setSession: (session) =>
         set({
-          session: s,
-          isActive: true,
+          session,
+          status: "preview", // default next step after setting session
+          isActive: false,
           isPaused: false,
           elapsedSeconds: 0,
         }),
 
+      setStatus: (status) => set({ status }),
+
+      startSession: () =>
+        set({ status: "active", isActive: true, isPaused: false }),
+
       endSession: () => {
         set({
           session: null,
+          status: "completed",
           isActive: false,
           isPaused: false,
           elapsedSeconds: 0,
@@ -58,8 +71,8 @@ export const usePracticeStore = create<PracticeStore>()(
       resume: () => set({ isPaused: false }),
 
       tick: () => {
-        const { isPaused, session, elapsedSeconds } = get();
-        if (session && !isPaused) {
+        const { isPaused, session, isActive, elapsedSeconds } = get();
+        if (session && isActive && !isPaused) {
           set({ elapsedSeconds: elapsedSeconds + 1 });
         }
       },

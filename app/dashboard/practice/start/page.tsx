@@ -1,17 +1,27 @@
+"use client";
+
+import { usePracticeStore } from "@/utils/zustand/practiceStore";
+import { InputForm } from "./input-form"; // your form component
+import { PracticePreview } from "./practice-preview"; // we'll make this next
 import { Card } from "@/components/ui/card";
-import { InputForm } from "./StartPracticeForm.client";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
-export default function StartPracticePage() {
+function Content() {
+  const { status } = usePracticeStore();
+  if (status === "preview") {
+    return <PracticePreview />;
+  }
+
+  return <InputForm />;
+}
+
+export default function PracticeStartPage() {
   return (
-    <div className="p-5 flex flex-col items-center">
-      <div className="mb-5 text-center">
-        <h2 className="text-3xl font-bold tracking-tight">Start Practice</h2>
-        <p className="text-muted-foreground">Let&apos;s get to work.</p>
-      </div>
-
-      <Card className="p-12 w-full max-w-xl">
-        <InputForm />
+    <>
+      <DashboardHeader title="Start Practice" subtitle="Let's get to work" />
+      <Card className="p-5">
+        <Content />
       </Card>
-    </div>
+    </>
   );
 }

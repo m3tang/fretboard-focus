@@ -1,7 +1,9 @@
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+
 export default function Home() {
   return (
     <div>
-      <p>Dashboard</p>
+      <DashboardHeader title="Home" subtitle="Put home stuff here" />
     </div>
   );
 }

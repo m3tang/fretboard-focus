@@ -2,6 +2,7 @@
 
 import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { GuitarIcon, Menu } from "lucide-react";
@@ -50,7 +51,7 @@ export default function DashboardLayout({
         <aside className="hidden md:block border-r px-4 py-6">
           <DashboardNav />
         </aside>
-        <main className="flex flex-1 flex-col bg-muted/40">{children}</main>
+        <main className="flex flex-1 flex-col bg-muted/40 p-5">{children}</main>
       </div>
     </div>
   );
