@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,7 +40,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <div className="flex flex-col min-h-screen">
-            <main className="flex-1">{children}</main>
+            <main className="flex-1">
+              {children}
+              <Toaster />
+            </main>
           </div>
         </ThemeProvider>
       </body>
