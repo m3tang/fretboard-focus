@@ -14,7 +14,7 @@ export default function SessionSummaryPage({
   const { id } = use(params);
 
   const router = useRouter();
-  const { session, endSession } = usePracticeStore();
+  const { session, clearSession } = usePracticeStore();
 
   // If session not found (user refreshed, etc.), you could redirect or show a fallback
   if (!session || session.id !== id) {
@@ -29,7 +29,6 @@ export default function SessionSummaryPage({
   }
 
   const totalMinutes = Math.floor(session.duration);
-  const moduleTime = Math.floor(session.timePerModule);
 
   return (
     <div className="flex flex-col items-center p-8 space-y-6 max-w-2xl mx-auto">
@@ -48,9 +47,9 @@ export default function SessionSummaryPage({
           <div className="space-y-2">
             <h4 className="text-md font-semibold">Modules Practiced:</h4>
             <ul className="list-disc list-inside text-muted-foreground">
-              {session.modules.map((module, idx) => (
-                <li key={idx}>
-                  {module} — {moduleTime} min
+              {session.modules.map((moduleObj) => (
+                <li key={moduleObj.module}>
+                  {moduleObj.module} — {moduleObj.duration} min
                 </li>
               ))}
             </ul>
@@ -58,21 +57,22 @@ export default function SessionSummaryPage({
 
           <div className="flex justify-center gap-4 pt-4">
             <Button
-              onClick={() => {
-                endSession();
-                router.push("/dashboard/practice/start");
-              }}
-            >
-              Start New Session
-            </Button>
-            <Button
               variant="outline"
               onClick={() => {
-                endSession();
+                clearSession();
                 router.push("/dashboard");
               }}
             >
-              Return to Dashboard
+              Discard
+            </Button>
+            <Button
+              onClick={() => {
+                clearSession();
+                // write to database
+                router.push("/dashboard");
+              }}
+            >
+              Save
             </Button>
           </div>
         </CardContent>

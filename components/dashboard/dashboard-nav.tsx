@@ -28,28 +28,32 @@ function formatTime(seconds: number): string {
 
 export function DashboardNav() {
   const pathname = usePathname();
-  const { session, isActive, elapsedSeconds, currentModuleIndex } =
+  const { session, status, elapsedSeconds, currentModuleIndex } =
     usePracticeStore();
   const { unlock } = useAudioStore();
 
   const [displayTime, setDisplayTime] = useState(elapsedSeconds);
 
   useEffect(() => {
-    if (isActive && session) {
+    if (session) {
       setDisplayTime(elapsedSeconds);
     }
-  }, [isActive, session, elapsedSeconds]);
+  }, [session, elapsedSeconds]);
 
-  const cta =
-    isActive && session
-      ? {
-          label: `${session.modules[currentModuleIndex()]}: ${formatTime(displayTime)}`,
-          href: `/dashboard/practice/active/${session.id}`,
-        }
-      : {
-          label: "Start Practice",
-          href: "/dashboard/practice/start",
-        };
+  const currentIndex = currentModuleIndex();
+
+  const cta = session
+    ? {
+        label:
+          status === "completed" || currentIndex === null
+            ? "Practice Complete"
+            : `${session.modules[currentIndex]?.module}: ${formatTime(displayTime)}`,
+        href: `/dashboard/practice/active/${session.id}`,
+      }
+    : {
+        label: "Start Practice",
+        href: "/dashboard/practice/start",
+      };
 
   return (
     <nav className="grid gap-2">

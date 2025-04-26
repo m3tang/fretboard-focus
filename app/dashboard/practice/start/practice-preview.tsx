@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
 export function PracticePreview() {
-  const { session } = usePracticeStore();
+  const { session, startSession } = usePracticeStore();
   const router = useRouter();
 
   if (!session) return null; // defensive check
@@ -34,7 +34,7 @@ export function PracticePreview() {
         </Button>
         <Button
           onClick={() => {
-            usePracticeStore.getState().setStatus("active");
+            startSession();
             router.push(`/dashboard/practice/active/${session.id}`);
           }}
         >
