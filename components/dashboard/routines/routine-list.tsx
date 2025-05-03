@@ -3,18 +3,19 @@
 import { Routine } from "@/types/routine";
 import { useEffect } from "react";
 import { useRoutineStore } from "@/utils/zustand/routineStore";
-import { RoutineCard } from "@/components/dashboard/routines/routine-card"; // ← new!
+import { RoutineCard } from "@/components/dashboard/routines/routine-card";
 
 interface RoutineListProps {
   routines: Routine[];
 }
 
 export function RoutineList({ routines }: RoutineListProps) {
-  const { routines: storeRoutines, initDefaultRoutines } = useRoutineStore();
+  const storeRoutines = useRoutineStore((s) => s.routines);
+  const setRoutines = useRoutineStore((s) => s.setRoutines);
 
   useEffect(() => {
-    initDefaultRoutines(routines);
-  }, [initDefaultRoutines, routines]);
+    setRoutines(routines); // always overwrite with fresh server data
+  }, [routines, setRoutines]);
 
   return (
     <div className="grid gap-4">

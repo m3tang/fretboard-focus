@@ -1,11 +1,9 @@
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { fetchRoutinesFromDb } from "@/utils/data/fetchRoutines";
-import { RoutineList } from "@/components/dashboard/routines/routine-list"; // extracted below
+import { RoutineList } from "@/components/dashboard/routines/routine-list"; // client component
 
 export default async function RoutinesPage() {
-  const routinesFromDb = await fetchRoutinesFromDb(); // server fetch
-
-  console.log(routinesFromDb);
+  const routinesFromDb = await fetchRoutinesFromDb(); // always fresh from DB
 
   return (
     <div>

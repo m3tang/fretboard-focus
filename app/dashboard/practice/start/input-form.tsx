@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,8 +19,8 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
-import { nanoid } from "nanoid";
-import { ModuleName, MODULES } from "@/types/modules"; // Make sure you import this
+import { fetchModules } from "@/utils/data/fetchModules";
+import { Module } from "@/types/modules";
 
 const FormSchema = z.object({
   name: z.string().min(2, {
@@ -30,49 +32,55 @@ const FormSchema = z.object({
       const n = Number(val);
       return !isNaN(n) && Number.isInteger(n) && n >= 1 && n <= 180;
     },
-    {
-      message: "Duration must be an integer between 1 and 180",
-    }
+    { message: "Duration must be an integer between 1 and 180" }
   ),
 });
 
-// Correct module names here
-const modules = MODULES;
-
 export function InputForm() {
+  const [modules, setModules] = useState<Module[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchModules().then(setModules);
+  }, []);
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       name: "Practice #1",
-      modules: ["Warmup", "Technique", "Scales"],
+      modules: [],
       duration: "60",
     },
   });
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
-    const sessionId = nanoid();
-    const selectedModules = data.modules as ModuleName[];
-    const totalDuration = Number(data.duration);
+    const sessionId = crypto.randomUUID();
+    const selectedModules = data.modules;
+    const durationMinutes = Number(data.duration);
+    const durationSeconds = durationMinutes * 60;
 
-    const durationPerModule = Math.floor(
-      totalDuration / selectedModules.length
-    );
-
-    const builtModules = selectedModules.map((module) => ({
-      module,
-      duration: durationPerModule,
+    const builtModules = selectedModules.map((mod, index) => ({
+      id: crypto.randomUUID(),
+      module: mod,
+      weight: 1,
+      orderIndex: index,
+      exercises: [],
+      computedDuration: 0,
     }));
 
     usePracticeStore.getState().setSession({
       id: sessionId,
+      userId: "",
       name: data.name,
-      duration: totalDuration,
+      duration: durationSeconds,
       modules: builtModules,
       startTime: Date.now(),
       currentModuleIndex: 0,
+      currentExerciseIndex: 0,
     });
 
     usePracticeStore.getState().setStatus("preview");
+    router.push(`/dashboard/practice/preview/${sessionId}`);
   }
 
   return (
@@ -96,45 +104,6 @@ export function InputForm() {
           )}
         />
 
-        {/* Duration */}
-        <FormField
-          control={form.control}
-          name="duration"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Session Duration</FormLabel>
-
-              <div className="flex flex-row items-center gap-2">
-                <FormControl>
-                  <Input
-                    type="number"
-                    inputMode="numeric"
-                    value={field.value ?? ""}
-                    onChange={field.onChange}
-                    placeholder="60"
-                    max={180}
-                    className="w-auto"
-                  />
-                </FormControl>
-                <FormDescription>minutes</FormDescription>
-              </div>
-
-              {/* Slider */}
-              <FormControl>
-                <Slider
-                  max={180}
-                  step={5}
-                  value={[Number(field.value) || 1]}
-                  onValueChange={(val) => field.onChange(String(val[0]))}
-                  className="w-full"
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {/* Modules */}
         <FormField
           control={form.control}
@@ -152,19 +121,19 @@ export function InputForm() {
                   onValueChange={field.onChange}
                   className="flex flex-wrap gap-2"
                 >
-                  {modules.map((module, idx) => {
-                    const isSelected = field.value?.includes(module);
+                  {modules.map((mod) => {
+                    const isSelected = field.value?.includes(mod.name);
                     return (
                       <ToggleGroupItem
-                        key={idx}
-                        value={module}
+                        key={mod.id}
+                        value={mod.name}
                         className={
                           !isSelected
                             ? "border border-muted text-muted-foreground"
                             : ""
                         }
                       >
-                        {module}
+                        {mod.name}
                       </ToggleGroupItem>
                     );
                   })}
@@ -175,7 +144,41 @@ export function InputForm() {
           )}
         />
 
-        {/* Submit */}
+        {/* Duration */}
+        <FormField
+          control={form.control}
+          name="duration"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Session Duration</FormLabel>
+              <div className="flex flex-row items-center gap-2">
+                <FormControl>
+                  <Input
+                    type="number"
+                    inputMode="numeric"
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value)}
+                    placeholder="60"
+                    max={180}
+                    className="w-auto"
+                  />
+                </FormControl>
+                <FormDescription>minutes</FormDescription>
+              </div>
+              <FormControl>
+                <Slider
+                  max={180}
+                  step={5}
+                  value={[Number(field.value) || 1]}
+                  onValueChange={(val) => field.onChange(String(val[0]))}
+                  className="w-full"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit">Next</Button>
       </form>
     </Form>

@@ -42,18 +42,26 @@ export function DashboardNav() {
 
   const currentIndex = currentModuleIndex();
 
-  const cta = session
-    ? {
-        label:
-          status === "completed" || currentIndex === null
-            ? "Practice Complete"
-            : `${session.modules[currentIndex]?.module}: ${formatTime(displayTime)}`,
-        href: `/dashboard/practice/active/${session.id}`,
-      }
-    : {
+  const cta = (() => {
+    if (!session || status === "preview") {
+      return {
         label: "Start Practice",
         href: "/dashboard/practice/start",
       };
+    }
+
+    if (status === "completed" || currentIndex === null) {
+      return {
+        label: "Practice Complete",
+        href: `/dashboard/practice/summary/${session.id}`,
+      };
+    }
+
+    return {
+      label: `${session.modules[currentIndex]?.module}: ${formatTime(displayTime)}`,
+      href: `/dashboard/practice/active/${session.id}`,
+    };
+  })();
 
   return (
     <nav className="grid gap-2">

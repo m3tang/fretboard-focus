@@ -1,10 +1,8 @@
-import { ModuleName } from "./modules";
-
 export type Exercise = {
   id: string;
   name: string;
   description?: string;
   isCustom: boolean;
-  modules: ModuleName[];
+  modules: string[];
   userId?: string; // ← NEW: only present for custom exercises
 };

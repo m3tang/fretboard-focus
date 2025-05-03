@@ -1,15 +1,32 @@
-import { ModuleName } from "./modules";
-
 export type Routine = {
   id: string;
   name: string;
   description?: string;
-  totalDuration: number; // total duration in minutes (sum of module durations)
-  modules: RoutineModule[]; // new type below
-  isCustom: boolean; // true = user-created, false = app-provided
+  defaultDuration: number; // in seconds, used as baseline for scaling
+  modules: RoutineModule[];
+  isCustom: boolean;
 };
 
 export type RoutineModule = {
-  module: ModuleName;
-  duration: number; // minutes allocated to this module
+  id: string;
+  module: string;
+  weight: number;
+  orderIndex: number;
+  computedDuration: number; // ← add this
+  exercises?: AssignedExercise[];
+};
+
+export type AssignedExercise = {
+  id: string;
+  name: string;
+  weight: number;
+  computedDuration: number; // runtime duration in seconds
+};
+
+export type RoutineModuleExercise = {
+  id: string;
+  moduleId: string;
+  exerciseId: string;
+  weight: number;
+  orderIndex: number;
 };

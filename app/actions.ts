@@ -4,6 +4,12 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { savePracticeSessionToDb } from "@/utils/data/savePracticeSessionToDb";
+import type {
+  LoggedPracticeSession,
+  LoggedPracticeModule,
+  LoggedPracticeExercise,
+} from "@/types/practiceSession";
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -132,3 +138,11 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/sign-in");
 };
+
+export async function savePracticeSession(
+  session: LoggedPracticeSession & {
+    modules: (LoggedPracticeModule & { exercises: LoggedPracticeExercise[] })[];
+  }
+) {
+  return savePracticeSessionToDb(session);
+}

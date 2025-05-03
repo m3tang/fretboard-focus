@@ -14,6 +14,12 @@ import {
 import { Button } from "@/components/ui/button";
 import Metronome from "@/components/Metronome";
 
+function formatMMSS(seconds: number) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 export default function ActivePracticePage({
   params,
 }: {
@@ -21,6 +27,7 @@ export default function ActivePracticePage({
 }) {
   const { id } = use(params);
   const router = useRouter();
+
   const {
     session,
     isPaused,
@@ -29,16 +36,16 @@ export default function ActivePracticePage({
     pause,
     resume,
     currentModuleIndex,
-    moduleProgress,
     overallProgress,
-    completedModule,
-    clearCompletedModule,
     softEndSession,
+    moduleStartSeconds,
+    manualProgressSeconds,
   } = usePracticeStore();
 
   const handleFinish = useCallback(() => {
+    softEndSession();
     router.replace(`/dashboard/practice/summary/${id}`);
-  }, [id, router]);
+  }, [id, router, softEndSession]);
 
   useEffect(() => {
     if (!session) {
@@ -65,181 +72,215 @@ export default function ActivePracticePage({
   const currentModule =
     currentIndex !== null ? session.modules[currentIndex] : null;
 
+  const moduleElapsedSeconds =
+    elapsedSeconds + manualProgressSeconds - moduleStartSeconds;
+
+  const currentExercise =
+    currentModule?.exercises?.[session.currentExerciseIndex] ?? null;
+
+  const exerciseProgress = currentExercise
+    ? (moduleElapsedSeconds / currentExercise.computedDuration) * 100
+    : 0;
+
   return (
-    <div className="p-6 w-full mx-auto space-y-8 max-w-4xl transition">
-      {/* Header */}
-      <div className="flex flex-row justify-between items-center">
-        <div>
-          <div className="flex flex-row gap-5 items-center">
-            <h2 className="text-3xl font-bold">{session.name}</h2>
-            {isPaused && (
-              <div className="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-3 py-1.5 rounded-full border border-yellow-300 shadow-sm animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-yellow-600" />
-                Paused
-              </div>
-            )}
+    <div className="flex flex-row w-full h-full p-6 max-w-screen-lg mx-auto gap-6 transition">
+      {/* Sidebar: Full Routine */}
+      <div className="w-64 border-r pr-4 overflow-y-auto max-h-[80vh]">
+        <div className="space-y-6">
+          <div>
+            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Routine Overview
+            </h4>
+            <ul className="space-y-4 text-sm">
+              {session.modules.map((mod, modIdx) => (
+                <li key={mod.id}>
+                  <p
+                    className={`font-medium mb-1 ${
+                      modIdx === currentIndex ? "text-primary" : ""
+                    }`}
+                  >
+                    {mod.module}
+                  </p>
+                  <ul className="space-y-1 pl-3 border-l border-muted">
+                    {(mod.exercises ?? []).map((ex, exIdx) => {
+                      const currentIdx = currentIndex ?? -1;
+                      const isCurrentModule = modIdx === currentIdx;
+                      const isCurrentExercise =
+                        isCurrentModule &&
+                        exIdx === session.currentExerciseIndex;
+                      const isCompleted =
+                        modIdx < currentIdx ||
+                        (isCurrentModule &&
+                          exIdx < session.currentExerciseIndex);
+
+                      return (
+                        <li
+                          key={ex.id}
+                          className={`flex justify-between items-center ${
+                            isCompleted
+                              ? "text-muted-foreground line-through"
+                              : isCurrentExercise
+                                ? "font-semibold text-primary"
+                                : "text-muted-foreground"
+                          }`}
+                        >
+                          <span>
+                            {isCompleted
+                              ? "✅"
+                              : isCurrentExercise
+                                ? "⏳"
+                                : "•"}{" "}
+                            {ex.name}
+                          </span>
+                          <span className="text-xs">
+                            {formatMMSS(ex.computedDuration)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              ))}
+            </ul>
           </div>
-          <p className="text-muted-foreground text-sm">
-            {new Date().toLocaleDateString(undefined, {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </p>
-        </div>
 
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => (isPaused ? resume() : pause())}
-          >
-            {isPaused ? "Resume" : "Pause"}
-          </Button>
-          <Button variant="default" onClick={handleFinish}>
-            End Session
-          </Button>
+          {/* Skip Module Button */}
+          <SkipModuleButton />
         </div>
       </div>
 
-      {/* Overall Time Tracker */}
-      <div className="w-full">
-        <Progress value={overallProgress()} />
-        <div className="flex justify-between text-sm text-muted-foreground mt-1">
-          <span>Elapsed: {Math.floor(elapsedSeconds / 60)} min</span>
-          <span>Planned: {session.duration} min</span>
-        </div>
-      </div>
-
-      {/* Module Stepper */}
-      <div className="flex gap-2 overflow-x-auto">
-        {session.modules.map((moduleObj, index) => (
-          <div
-            key={moduleObj.module}
-            className={`min-w-[100px] p-2 rounded-md text-sm font-semibold border text-center transition duration-300 ${
-              currentIndex === index
-                ? "bg-primary text-white scale-105"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {moduleObj.module}
+      {/* Main Content */}
+      <div className="flex-1 space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold">{session.name}</h2>
+            <p className="text-muted-foreground text-sm">
+              {new Date(session.startTime).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </p>
           </div>
-        ))}
-      </div>
-
-      {/* Current Module Focus */}
-      <div className="p-6 rounded-xl border shadow-md bg-background space-y-4">
-        {completedModule ? (
-          // 🎯 Module Completed View
-          <div className="flex flex-col items-center text-center space-y-6 mt-8">
-            <div className="flex flex-col items-center space-y-2">
-              <div className="bg-green-100 text-green-600 rounded-full p-3">
-                ✅
-              </div>
-              <h2 className="text-2xl font-bold text-green-700 animate-pulse">
-                {completedModule} Complete!
-              </h2>
-            </div>
-
-            {currentModule ? (
-              <div className="text-muted-foreground text-sm">
-                <span className="font-medium">Up Next:</span>{" "}
-                {currentModule.module}
-              </div>
-            ) : (
-              <div className="text-muted-foreground text-sm italic">
-                All modules complete — awesome work! 🎉
-              </div>
-            )}
-
+          <div className="flex gap-2">
             <Button
-              size="lg"
-              onClick={() => {
-                if (currentModule) {
-                  clearCompletedModule();
-                  resume();
-                } else {
-                  softEndSession();
-                  router.replace(`/dashboard/practice/summary/${id}`);
-                }
-              }}
-              className="mt-2 w-full max-w-xs"
+              variant="outline"
+              onClick={() => (isPaused ? resume() : pause())}
             >
-              {currentModule ? "Start Next Module" : "Finish Practice"}
+              {isPaused ? "Resume" : "Pause"}
             </Button>
+            <Button onClick={handleFinish}>End Session</Button>
           </div>
-        ) : currentModule ? (
-          // 🏃‍♂️ Normal In-Progress View
-          <>
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold">{currentModule.module}</h3>
-              <SkipModuleButton />
-            </div>
-
-            {typeof currentIndex === "number" && (
-              <div className="transition-all duration-500">
-                <Progress value={moduleProgress(currentIndex)} />
-              </div>
-            )}
-            {typeof currentIndex === "number" && (
-              <div className="flex justify-between text-sm text-muted-foreground mt-2">
-                <p>Stay focused. Move on when ready!</p>
-                <span>{Math.floor(moduleProgress(currentIndex))}%</span>
-              </div>
-            )}
-          </>
-        ) : null}
-      </div>
-
-      {process.env.NODE_ENV === "development" && (
-        <div className="flex justify-center mt-8">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              usePracticeStore.getState().autoCompleteModule();
-            }}
-            className="text-red-500 border border-red-300 hover:bg-red-50"
-          >
-            ⏱️ Dev: Auto-Complete Current Module
-          </Button>
         </div>
-      )}
 
-      {/* Metronome */}
-      <Metronome />
+        {/* Current Exercise */}
+        <div className="p-6 border rounded-xl bg-background shadow space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-bold">
+              {currentExercise?.name ?? "No exercise"}
+            </h3>
+          </div>
+
+          {currentExercise && (
+            <>
+              <Progress value={Math.min(exerciseProgress, 100)} />
+              <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                <span>
+                  {formatMMSS(moduleElapsedSeconds)} /{" "}
+                  {formatMMSS(currentExercise.computedDuration)}
+                </span>
+                <span>{Math.floor(exerciseProgress)}%</span>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <SkipExerciseButton />
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Metronome */}
+        {currentModule && <Metronome />}
+      </div>
     </div>
   );
 }
 
-function SkipModuleButton() {
-  const [showFinishConfirm, setShowFinishConfirm] = useState(false);
-  const finishModule = usePracticeStore((s) => s.finishModule);
+function SkipExerciseButton() {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const nextExercise = usePracticeStore((s) => s.nextExercise);
+  const session = usePracticeStore((s) => s.session);
+
+  const canSkip =
+    session &&
+    session.currentModuleIndex < session.modules.length &&
+    session.modules[session.currentModuleIndex]?.exercises &&
+    session.currentExerciseIndex + 1 <
+      session.modules[session.currentModuleIndex].exercises!.length;
 
   return (
-    <Dialog open={showFinishConfirm} onOpenChange={setShowFinishConfirm}>
+    <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
       <DialogTrigger asChild>
-        <Button variant="secondary" size="sm">
-          Finish Module
+        <Button variant="ghost" disabled={!canSkip}>
+          Skip →
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogTitle className="text-lg font-semibold">
-          Finish Module Early?
+          Skip this exercise?
         </DialogTitle>
         <DialogDescription className="text-sm text-muted-foreground mb-4">
-          Are you sure you want to finish this module? You’ll be paused after
-          skipping.
+          Are you sure you want to move on? You won’t be able to return to this
+          exercise.
         </DialogDescription>
-
         <div className="flex gap-2 justify-end">
-          <Button variant="outline" onClick={() => setShowFinishConfirm(false)}>
+          <Button variant="outline" onClick={() => setShowConfirm(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              nextExercise();
+              setShowConfirm(false);
+            }}
+          >
+            Confirm
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function SkipModuleButton() {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const finishModule = usePracticeStore((s) => s.finishModule);
+
+  return (
+    <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
+      <DialogTrigger asChild>
+        <Button variant="secondary" className="w-full">
+          Skip Module
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogTitle className="text-lg font-semibold">
+          Skip this module?
+        </DialogTitle>
+        <DialogDescription className="text-sm text-muted-foreground mb-4">
+          Are you sure you want to finish this module? You’ll move on and won’t
+          be able to return.
+        </DialogDescription>
+        <div className="flex gap-2 justify-end">
+          <Button variant="outline" onClick={() => setShowConfirm(false)}>
             Cancel
           </Button>
           <Button
             variant="destructive"
             onClick={() => {
               finishModule();
-              setShowFinishConfirm(false);
+              setShowConfirm(false);
             }}
           >
             Confirm
