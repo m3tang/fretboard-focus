@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { fetchExercisesFromDb } from "@/utils/data/fetchExercises";
 import { Exercise } from "@/types/exercise";
