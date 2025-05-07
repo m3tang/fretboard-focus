@@ -65,7 +65,7 @@ export default function Home() {
 
       {/* Features Section */}
       <section className="py-20 bg-background">
-        <div className="container">
+        <div className="container animate-fadeIn">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold font-heading">
               Practice Smarter, Improve Faster
@@ -96,7 +96,7 @@ export default function Home() {
 
       {/* Testimonials */}
       <section className="py-20 bg-muted/50">
-        <div className="container">
+        <div className="container animate-fadeIn">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold font-heading">
               Built for Better Practice
@@ -143,7 +143,7 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="py-20 bg-muted text-foreground">
-        <div className="container text-center">
+        <div className="container text-center animate-fadeIn">
           <h2 className="text-3xl md:text-4xl font-bold font-heading">
             Ready to Transform Your Guitar Practice?
           </h2>
