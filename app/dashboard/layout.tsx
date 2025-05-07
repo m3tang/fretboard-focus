@@ -15,7 +15,6 @@ export default function DashboardLayout({
 }) {
   const [isClient, setIsClient] = useState(false);
 
-  // This effect ensures hydration mismatch is avoided
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -26,7 +25,8 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 h-16 flex items-center gap-4 border-b bg-background px-4 md:px-6">
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="md:hidden">
@@ -48,11 +48,18 @@ export default function DashboardLayout({
           <Link href="/dashboard/settings">Settings</Link>
         </div>
       </header>
-      <div className="flex-1 grid grid-cols-1 md:grid-cols-[220px_1fr]">
-        <aside className="hidden md:block border-r px-4 py-6">
+
+      {/* Spacer for fixed header */}
+      <div className="h-16" />
+
+      <div className="flex flex-1">
+        {/* Fixed Sidebar */}
+        <aside className="hidden md:block fixed top-16 left-0 h-[calc(100vh-64px)] w-[220px] border-r bg-background px-4 py-6 overflow-y-auto">
           <DashboardNav />
         </aside>
-        <main className="flex flex-1 flex-col bg-muted/40 p-5">{children}</main>
+
+        {/* Main content */}
+        <main className="flex-1 md:ml-[220px] bg-muted/40 p-5">{children}</main>
       </div>
     </div>
   );
