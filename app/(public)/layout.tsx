@@ -1,4 +1,4 @@
-import HeaderAuth from "@/components/header-auth";
+// import HeaderAuth from "@/components/header-auth";
 import "@/app/globals.css";
 import { NavigationMenu } from "@/components/nav-menu";
 

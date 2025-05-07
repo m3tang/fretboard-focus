@@ -6,7 +6,6 @@ import {
   ChevronRight,
   LineChart,
   ListChecks,
-  PlayCircle,
   Star,
   Timer,
   Trophy,
@@ -168,7 +167,7 @@ type FeatureCardProps = {
   className?: string;
 };
 
-export function FeatureCard({
+function FeatureCard({
   icon,
   title,
   description,

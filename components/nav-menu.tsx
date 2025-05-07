@@ -2,20 +2,26 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { GuitarIcon } from "lucide-react";
+// import { usePathname } from "next/navigation";
+import Image from "next/image";
+// import { cn } from "@/lib/utils";
+// import { GuitarIcon } from "lucide-react";
 
 export function NavigationMenu() {
-  const pathname = usePathname();
+  // const pathname = usePathname();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="flex items-center space-x-2">
-            <img src="icon.svg" alt="My Icon" width={24} height={24} />
-
+            <Image
+              src="/icon.svg" // must be in /public
+              alt="FretBook logo"
+              width={24}
+              height={24}
+              priority
+            />
             <span className="font-bold text-xl text-primary font-heading">
               FretBook
             </span>
