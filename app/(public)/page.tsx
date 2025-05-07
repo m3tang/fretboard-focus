@@ -24,13 +24,12 @@ export default function Home() {
             {/* Text */}
             <div className="flex-1 space-y-6 text-center lg:text-left max-w-xl">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading tracking-tight">
-                Your Practice, Perfected
+                Your Guitar Practice, All in One Place
               </h1>
 
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
-                Turn practice into progress with personalized routines,
-                real-time tracking, repertoire manager, and integrated metronome
-                built to help you improve faster.
+                Level up faster with guided routines, real-time tracking, and a
+                built-in metronome in one simple practice workspace.
               </p>
 
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
@@ -139,8 +138,8 @@ export default function Home() {
             Ready to Transform Your Guitar Practice?
           </h2>
           <p className="mt-6 text-lg md:text-xl text-muted-foreground">
-            Join thousands of guitarists making faster progress through
-            structured, focused sessions.
+            Sign up for early access to the practice system built for real
+            improvement.
           </p>
           <div className="mt-10">
             <Button
