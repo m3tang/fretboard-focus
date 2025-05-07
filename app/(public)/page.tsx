@@ -3,7 +3,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Activity,
-  ChevronRight,
   LineChart,
   ListChecks,
   Star,
@@ -13,6 +12,7 @@ import {
 import { ReactNode } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { WaitlistDialog } from "@/components/waitlist-dialogue";
 
 export default function Home() {
   return (
@@ -34,16 +34,7 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
-                <Button size="lg" asChild>
-                  <Link href="/signup">
-                    Get Started <ChevronRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                {/* <Button size="lg" variant="outline" asChild>
-                  <Link href="/demo">
-                    <PlayCircle className="mr-2 h-4 w-4" /> Watch Demo
-                  </Link>
-                </Button> */}
+                <WaitlistDialog />
               </div>
             </div>
 
@@ -142,18 +133,24 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-muted text-foreground">
-        <div className="container text-center animate-fadeIn">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading">
+      <section className="py-24 bg-muted text-foreground">
+        <div className="container mx-auto max-w-3xl text-center px-6 animate-fadeIn">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight font-heading">
             Ready to Transform Your Guitar Practice?
           </h2>
-          <p className="mt-4 text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-            Join thousands of guitarists who are making faster progress with
-            structured, focused practice.
+          <p className="mt-6 text-lg md:text-xl text-muted-foreground">
+            Join thousands of guitarists making faster progress through
+            structured, focused sessions.
           </p>
-          <Button size="lg" className="mt-8" asChild>
-            <Link href="/signup">Start Your Free Trial</Link>
-          </Button>
+          <div className="mt-10">
+            <Button
+              size="lg"
+              className="px-8 py-6 text-base md:text-lg"
+              asChild
+            >
+              <Link href="/signup">Join the Waitlist</Link>
+            </Button>
+          </div>
         </div>
       </section>
     </div>
