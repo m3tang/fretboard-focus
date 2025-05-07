@@ -57,7 +57,9 @@ export function WaitlistDialog() {
           </DialogDescription>
         </DialogHeader>
         {submitted ? (
-          <p className="text-sm text-green-600">Thanks! You're on the list.</p>
+          <p className="text-sm text-green-600">
+            Thanks! You&apos;re on the list.
+          </p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <Input
