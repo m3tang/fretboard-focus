@@ -1,47 +1,61 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, PlayCircle } from "lucide-react";
+import {
+  Activity,
+  ChevronRight,
+  LineChart,
+  ListChecks,
+  PlayCircle,
+  Star,
+  Timer,
+  Trophy,
+} from "lucide-react";
+import { ReactNode } from "react";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen w-full">
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-background z-0"></div>
-        <div className="container relative z-10">
-          <div className="flex flex-col lg:flex-row gap-10 lg:gap-20 items-center">
-            <div className="flex-1 space-y-6 text-center lg:text-left">
+        <div className="container relative z-10 ">
+          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-24 animate-fadeIn">
+            {/* Text */}
+            <div className="flex-1 space-y-6 text-center lg:text-left max-w-xl">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-heading tracking-tight">
-                Master Your Guitar{" "}
-                <span className="text-primary">Practice</span>
+                Your Practice, Perfected
               </h1>
+
               <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0">
-                Generate dynamic practice routines, track your progress, and
-                improve faster with our interactive tools and built-in
-                metronome.
+                Turn practice into progress with personalized routines,
+                real-time tracking, repertoire manager, and integrated metronome
+                built to help you improve faster.
               </p>
+
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4">
                 <Button size="lg" asChild>
                   <Link href="/signup">
                     Get Started <ChevronRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild>
+                {/* <Button size="lg" variant="outline" asChild>
                   <Link href="/demo">
                     <PlayCircle className="mr-2 h-4 w-4" /> Watch Demo
                   </Link>
-                </Button>
+                </Button> */}
               </div>
             </div>
-            <div className="flex-1">
-              <div className="relative h-[300px] md:h-[400px] lg:h-[500px] rounded-lg overflow-hidden shadow-xl">
+
+            {/* Wider Image */}
+            <div className="flex-[1.25] w-full">
+              <div className="relative aspect-[45/32] rounded-lg overflow-hidden shadow-xl">
                 <Image
-                  src="https://images.pexels.com/photos/3960095/pexels-photo-3960095.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
+                  src="/home@2x.png"
                   alt="Guitarist practicing"
                   fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-contain"
                   priority
                 />
               </div>
@@ -55,20 +69,28 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold font-heading">
-              How Fretboard Focus Helps You Improve
+              Practice Smarter, Improve Faster
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our unique features are designed to accelerate your progress and
-              make practice more effective.
+              FretBook gives you a structured, distraction-free practice flow—so
+              you can build consistency, track progress, and stay in the zone
+              every time you pick up your guitar.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* <FeatureCard
-              icon={<Clock className="h-6 w-6" />}
-              title="Dynamic Practice Sessions"
-              description="Generate personalized practice routines based on your skill level, available time, and goals."
-            /> */}
+          {/* Wider Image */}
+          <div className="flex-[1.25] w-full">
+            <div className="w-[80%] mx-auto">
+              <div className="relative aspect-[45/32] rounded-lg overflow-hidden shadow-xl">
+                <Image
+                  src="/practice@2x.png"
+                  alt="Guitarist practicing"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -78,27 +100,50 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold font-heading">
-              What Our Users Say
+              Built for Better Practice
             </h2>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-              Guitarists of all levels are improving faster with Fretboard
-              Focus.
+              From custom routines to real-time tracking, FretBook gives you the
+              tools you need to stay consistent, motivated, and improving.
             </p>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* <TestimonialCard
-              quote="Since using this app, my practice sessions have become much more focused and productive. I've made more progress in 3 months than I did in the previous year."
-              author="Michael Rodriguez"
-              role="Intermediate Guitarist"
-              avatarUrl="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            /> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            <FeatureCard
+              icon={<ListChecks className="w-6 h-6" />}
+              title="Custom Routines"
+              description="Build structured sessions based on your skill level, goals, and time."
+            />
+            <FeatureCard
+              icon={<LineChart className="w-6 h-6" />}
+              title="Progress Tracking"
+              description="Visualize your growth and stay motivated with charts and streaks."
+            />
+            <FeatureCard
+              icon={<Activity className="w-6 h-6" />}
+              title="Built-in Metronome"
+              description="Practice in perfect time with our clean, adjustable metronome."
+            />
+            <FeatureCard
+              icon={<Timer className="w-6 h-6" />}
+              title="Time-Split Modules"
+              description="Break sessions into focused blocks like warm-ups, scales, and songs."
+            />
+            <FeatureCard
+              icon={<Trophy className="w-6 h-6" />}
+              title="Practice Goals"
+              description="Set daily or weekly goals to build consistency and confidence."
+            />
+            <FeatureCard
+              icon={<Star className="w-6 h-6" />}
+              title="Favorites & Tags"
+              description="Save go-to exercises and filter routines by technique or focus area."
+            />
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary text-primary-foreground">
+      <section className="py-20 bg-muted text-foreground">
         <div className="container text-center">
           <h2 className="text-3xl md:text-4xl font-bold font-heading">
             Ready to Transform Your Guitar Practice?
@@ -107,11 +152,35 @@ export default function Home() {
             Join thousands of guitarists who are making faster progress with
             structured, focused practice.
           </p>
-          <Button size="lg" variant="secondary" className="mt-8" asChild>
+          <Button size="lg" className="mt-8" asChild>
             <Link href="/signup">Start Your Free Trial</Link>
           </Button>
         </div>
       </section>
     </div>
+  );
+}
+
+type FeatureCardProps = {
+  icon: ReactNode;
+  title: string;
+  description: string;
+  className?: string;
+};
+
+export function FeatureCard({
+  icon,
+  title,
+  description,
+  className,
+}: FeatureCardProps) {
+  return (
+    <Card className={cn("flex flex-col items-start p-6 gap-4", className)}>
+      <div className="text-primary">{icon}</div>
+      <div>
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className="text-sm text-muted-foreground mt-1">{description}</p>
+      </div>
+    </Card>
   );
 }

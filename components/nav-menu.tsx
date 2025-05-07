@@ -14,15 +14,16 @@ export function NavigationMenu() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 flex">
           <Link href="/" className="flex items-center space-x-2">
-            <GuitarIcon className="h-6 w-6" />
-            <span className="font-bold text-xl font-heading">
-              Fretboard Focus
+            <img src="icon.svg" alt="My Icon" width={24} height={24} />
+
+            <span className="font-bold text-xl text-primary font-heading">
+              FretBook
             </span>
           </Link>
         </div>
         <div className="flex-1">
           <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-            <Link
+            {/* <Link
               href="/"
               className={cn(
                 "transition-colors hover:text-foreground/80",
@@ -30,8 +31,8 @@ export function NavigationMenu() {
               )}
             >
               Home
-            </Link>
-            <Link
+            </Link> */}
+            {/* <Link
               href="/features"
               className={cn(
                 "transition-colors hover:text-foreground/80",
@@ -52,7 +53,7 @@ export function NavigationMenu() {
               )}
             >
               Pricing
-            </Link>
+            </Link> */}
           </nav>
         </div>
       </div>

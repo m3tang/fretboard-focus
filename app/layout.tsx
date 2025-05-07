@@ -18,7 +18,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Fretboard Focus | Guitar Practice Planner",
+  title: "FretBook",
   description:
     "Plan your guitar practice sessions, track progress, and improve faster with our interactive practice tools and metronome.",
 };

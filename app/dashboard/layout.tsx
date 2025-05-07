@@ -42,7 +42,7 @@ export default function DashboardLayout({
           <div>
             <Link href="/" className="flex items-center gap-2 md:gap-3">
               <GuitarIcon className="h-6 w-6" />
-              <span className="text-lg font-bold">Fretboard Focus</span>
+              <span className="text-lg font-bold">FretBook</span>
             </Link>
           </div>
           <Link href="/dashboard/settings">Settings</Link>
@@ -71,7 +71,7 @@ function MobileNav() {
       <div className="flex h-14 items-center border-b px-4">
         <Link href="/" className="flex items-center gap-2">
           <GuitarIcon className="h-6 w-6" />
-          <span className="text-lg font-bold">Fretboard Focus</span>
+          <span className="text-lg font-bold">FretBook</span>
         </Link>
       </div>
       <ScrollArea className="flex-1 py-2">

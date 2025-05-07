@@ -11,7 +11,7 @@ export default async function RootLayout({
     <div>
       <nav className="w-full px-8 flex justify-center border-b border-b-foreground/10 h-16 items-center justify-between">
         <NavigationMenu />
-        <HeaderAuth />
+        {/* <HeaderAuth /> */}
       </nav>
       <div className="flex justify-center w-full bg-blue">{children}</div>
     </div>
