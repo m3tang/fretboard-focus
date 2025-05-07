@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { fetchRoutinesFromDb } from "@/utils/data/fetchRoutines";
 import { RoutineList } from "@/components/dashboard/routines/routine-list"; // client component
