@@ -142,13 +142,7 @@ export default function Home() {
             improvement.
           </p>
           <div className="mt-10">
-            <Button
-              size="lg"
-              className="px-8 py-6 text-base md:text-lg"
-              asChild
-            >
-              <Link href="/signup">Join the Waitlist</Link>
-            </Button>
+            <WaitlistDialog />
           </div>
         </div>
       </section>
