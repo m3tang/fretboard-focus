@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { AssignedExercise, Routine, RoutineModule } from "@/types/routine";
-import { nanoid } from "nanoid";
 
 type PracticeSession = {
   id: string;
@@ -11,11 +10,12 @@ type PracticeSession = {
   startTime: number;
   currentModuleIndex: number;
   currentExerciseIndex: number;
-  userId: string; // ✅ Add this
-  routineId?: string; // optional
+  userId: string;
+  routineId?: string;
 };
 
 type SessionStatus = "draft" | "preview" | "active" | "completed";
+type ExerciseState = "not-started" | "active" | "paused";
 
 interface PracticeStore {
   session: PracticeSession | null;
@@ -26,6 +26,7 @@ interface PracticeStore {
   manualProgressSeconds: number;
   moduleStartSeconds: number;
   completedModule: string | null;
+  currentExerciseState: ExerciseState;
 
   setSession: (session: PracticeSession) => void;
   setStatus: (status: SessionStatus) => void;
@@ -62,6 +63,7 @@ export const usePracticeStore = create<PracticeStore>()(
       manualProgressSeconds: 0,
       moduleStartSeconds: 0,
       completedModule: null,
+      currentExerciseState: "not-started",
 
       setSession: (session) =>
         set({
@@ -73,6 +75,7 @@ export const usePracticeStore = create<PracticeStore>()(
           manualProgressSeconds: 0,
           moduleStartSeconds: 0,
           completedModule: null,
+          currentExerciseState: "not-started",
         }),
 
       setStatus: (status) => set({ status }),
@@ -88,6 +91,7 @@ export const usePracticeStore = create<PracticeStore>()(
             isPaused: false,
             moduleStartSeconds: 0,
             completedModule: null,
+            currentExerciseState: "not-started",
             session: {
               ...session,
               currentModuleIndex: 0,
@@ -101,6 +105,7 @@ export const usePracticeStore = create<PracticeStore>()(
           status: "completed",
           isActive: false,
           isPaused: false,
+          currentExerciseState: "not-started",
         }),
 
       clearSession: () =>
@@ -113,10 +118,20 @@ export const usePracticeStore = create<PracticeStore>()(
           manualProgressSeconds: 0,
           moduleStartSeconds: 0,
           completedModule: null,
+          currentExerciseState: "not-started",
         }),
 
-      pause: () => set({ isPaused: true }),
-      resume: () => set({ isPaused: false }),
+      pause: () =>
+        set({
+          isPaused: true,
+          currentExerciseState: "paused",
+        }),
+
+      resume: () =>
+        set({
+          isPaused: false,
+          currentExerciseState: "active",
+        }),
 
       tick: () => {
         const {
@@ -127,11 +142,22 @@ export const usePracticeStore = create<PracticeStore>()(
           moduleProgress,
           currentModuleIndex,
           autoCompleteModule,
+          manualProgressSeconds,
+          moduleStartSeconds,
+          currentExerciseState,
         } = get();
 
         if (session && isActive && !isPaused) {
           const newElapsed = elapsedSeconds + 1;
-          set({ elapsedSeconds: newElapsed });
+          const updates: Partial<PracticeStore> = {
+            elapsedSeconds: newElapsed,
+          };
+
+          if (currentExerciseState === "not-started") {
+            updates.currentExerciseState = "active";
+          }
+
+          set(updates);
 
           const currentIndex = currentModuleIndex();
           const currentExercise =
@@ -143,9 +169,7 @@ export const usePracticeStore = create<PracticeStore>()(
 
           if (
             currentExercise &&
-            newElapsed +
-              get().manualProgressSeconds -
-              get().moduleStartSeconds >=
+            newElapsed + manualProgressSeconds - moduleStartSeconds >=
               currentExercise.computedDuration
           ) {
             get().nextExercise();
@@ -175,6 +199,7 @@ export const usePracticeStore = create<PracticeStore>()(
           manualProgressSeconds: newManualProgress,
           moduleStartSeconds: newTotalProgress,
           isPaused: true,
+          currentExerciseState: "not-started",
           completedModule: currentModule.module,
           session: {
             ...session,
@@ -184,39 +209,11 @@ export const usePracticeStore = create<PracticeStore>()(
         });
       },
 
-      autoCompleteModule: () => {
-        const { session, manualProgressSeconds, elapsedSeconds } = get();
-        if (!session) return;
+      autoCompleteModule: () => get().finishModule(),
 
-        const currentIndex = get().currentModuleIndex();
-        if (currentIndex === null) return;
+      clearCompletedModule: () => set({ completedModule: null }),
 
-        const currentModule = session.modules[currentIndex];
-        const currentDurationInSeconds = currentModule.computedDuration;
-
-        const newManualProgress =
-          manualProgressSeconds + currentDurationInSeconds;
-        const newTotalProgress = elapsedSeconds + newManualProgress;
-
-        set({
-          manualProgressSeconds: newManualProgress,
-          moduleStartSeconds: newTotalProgress,
-          isPaused: true,
-          completedModule: currentModule.module,
-          session: {
-            ...session,
-            currentModuleIndex: currentIndex + 1,
-            currentExerciseIndex: 0,
-          },
-        });
-      },
-
-      clearCompletedModule: () =>
-        set({
-          completedModule: null,
-        }),
-
-      loadRoutine: (routine, userId: string) => {
+      loadRoutine: (routine, userId) => {
         const totalSessionDuration = routine.defaultDuration;
         const totalModuleWeight = routine.modules.reduce(
           (sum, m) => sum + m.weight,
@@ -253,8 +250,8 @@ export const usePracticeStore = create<PracticeStore>()(
           startTime: Date.now(),
           currentModuleIndex: 0,
           currentExerciseIndex: 0,
-          userId, // ✅ added
-          routineId: routine.id, // ✅ optional, if available
+          userId,
+          routineId: routine.id,
         };
 
         set({
@@ -266,6 +263,7 @@ export const usePracticeStore = create<PracticeStore>()(
           manualProgressSeconds: 0,
           moduleStartSeconds: 0,
           completedModule: null,
+          currentExerciseState: "not-started",
         });
       },
 
@@ -282,10 +280,12 @@ export const usePracticeStore = create<PracticeStore>()(
               ...session,
               currentExerciseIndex: nextIndex,
             },
+            currentExerciseState: "not-started",
+            isPaused: true,
             moduleStartSeconds: elapsedSeconds + manualProgressSeconds,
           });
         } else {
-          get().finishModule();
+          get().finishModule(); // finishModule already pauses and resets state
         }
       },
 
@@ -299,6 +299,7 @@ export const usePracticeStore = create<PracticeStore>()(
             ...session,
             currentExerciseIndex: prevIndex,
           },
+          currentExerciseState: "not-started",
           moduleStartSeconds: elapsedSeconds + manualProgressSeconds,
         });
       },
@@ -312,6 +313,7 @@ export const usePracticeStore = create<PracticeStore>()(
             ...session,
             currentExerciseIndex: 0,
           },
+          currentExerciseState: "not-started",
         });
       },
 
@@ -376,7 +378,7 @@ export const usePracticeStore = create<PracticeStore>()(
 
         const payload = {
           id: session.id,
-          userId: session.userId ?? "", // load from Supabase client before this
+          userId: session.userId ?? "",
           name: session.name,
           duration,
           startedAt: new Date(session.startTime).toISOString(),
@@ -401,7 +403,7 @@ export const usePracticeStore = create<PracticeStore>()(
           }),
         };
 
-        const { savePracticeSession } = await import("@/app/actions"); // dynamic import avoids client bundling
+        const { savePracticeSession } = await import("@/app/actions");
         await savePracticeSession(payload);
         clearSession();
       },

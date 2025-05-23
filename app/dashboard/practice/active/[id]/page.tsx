@@ -13,6 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Metronome from "@/components/Metronome";
+import { Card } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { CheckCircle, Circle } from "lucide-react";
 
 function formatMMSS(seconds: number) {
   const m = Math.floor(seconds / 60);
@@ -40,6 +48,7 @@ export default function ActivePracticePage({
     softEndSession,
     moduleStartSeconds,
     manualProgressSeconds,
+    currentExerciseState, // ← new
   } = usePracticeStore();
 
   const handleFinish = useCallback(() => {
@@ -68,7 +77,7 @@ export default function ActivePracticePage({
 
   if (!session) return null;
 
-  const currentIndex = currentModuleIndex();
+  const currentIndex = currentModuleIndex() ?? -1;
   const currentModule =
     currentIndex !== null ? session.modules[currentIndex] : null;
 
@@ -82,70 +91,128 @@ export default function ActivePracticePage({
     ? (moduleElapsedSeconds / currentExercise.computedDuration) * 100
     : 0;
 
+  // 🔄 Accordion control logic
+  const [openModuleId, setOpenModuleId] = useState<string | undefined>(
+    session.modules[0]?.id
+  );
+  const [lastModuleIndex, setLastModuleIndex] = useState(
+    session.currentModuleIndex
+  );
+
+  useEffect(() => {
+    const newIndex = session.currentModuleIndex;
+    const newId = session.modules[newIndex]?.id;
+
+    if (newIndex !== lastModuleIndex) {
+      setOpenModuleId(newId);
+      setLastModuleIndex(newIndex);
+    }
+  }, [session.currentModuleIndex, session.modules, lastModuleIndex]);
+
+  const exerciseButtonLabel =
+    currentExerciseState === "not-started"
+      ? "Start"
+      : currentExerciseState === "active"
+        ? "Pause"
+        : "Resume";
+
+  const handleExerciseControl = () => {
+    if (
+      currentExerciseState === "not-started" ||
+      currentExerciseState === "paused"
+    ) {
+      resume();
+    } else {
+      pause();
+    }
+  };
+
   return (
-    <div className="flex flex-row w-full h-full p-6 max-w-screen-lg mx-auto gap-6 transition">
+    <div className="flex flex-row w-full h-full p-6 mx-auto gap-6 transition">
       {/* Sidebar: Full Routine */}
-      <div className="w-64 border-r pr-4 overflow-y-auto max-h-[80vh]">
+      <div className="w-1/4 pr-4 overflow-y-auto max-h-[80vh]">
         <div className="space-y-6">
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Routine Overview
+          <Card className="p-10">
+            <h4 className="text-xl font-semibold tracking-wide">
+              Beginner Essentials
             </h4>
-            <ul className="space-y-4 text-sm">
-              {session.modules.map((mod, modIdx) => (
-                <li key={mod.id}>
-                  <p
-                    className={`font-medium mb-1 ${
-                      modIdx === currentIndex ? "text-primary" : ""
-                    }`}
+            <h3 className="text-sm text-muted-foreground mb-4">
+              Master the fundamentals
+            </h3>
+
+            <Accordion
+              type="single"
+              collapsible
+              value={openModuleId}
+              onValueChange={setOpenModuleId}
+              className="w-full"
+            >
+              {session.modules.map((mod, modIdx) => {
+                const isCurrentModule = modIdx === currentIndex;
+
+                return (
+                  <AccordionItem
+                    key={mod.id}
+                    value={mod.id}
+                    className="border-none"
                   >
-                    {mod.module}
-                  </p>
-                  <ul className="space-y-1 pl-3 border-l border-muted">
-                    {(mod.exercises ?? []).map((ex, exIdx) => {
-                      const currentIdx = currentIndex ?? -1;
-                      const isCurrentModule = modIdx === currentIdx;
-                      const isCurrentExercise =
-                        isCurrentModule &&
-                        exIdx === session.currentExerciseIndex;
-                      const isCompleted =
-                        modIdx < currentIdx ||
-                        (isCurrentModule &&
-                          exIdx < session.currentExerciseIndex);
+                    <AccordionTrigger
+                      className={`text-sm font-medium px-2 py-2 rounded-md hover:bg-muted transition ${
+                        isCurrentModule ? "text-primary" : ""
+                      }`}
+                    >
+                      {mod.module}
+                    </AccordionTrigger>
 
-                      return (
-                        <li
-                          key={ex.id}
-                          className={`flex justify-between items-center ${
-                            isCompleted
-                              ? "text-muted-foreground line-through"
-                              : isCurrentExercise
-                                ? "font-semibold text-primary"
-                                : "text-muted-foreground"
-                          }`}
-                        >
-                          <span>
-                            {isCompleted
-                              ? "✅"
-                              : isCurrentExercise
-                                ? "⏳"
-                                : "•"}{" "}
-                            {ex.name}
-                          </span>
-                          <span className="text-xs">
-                            {formatMMSS(ex.computedDuration)}
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </div>
+                    <AccordionContent className="mt-2 space-y-2 pl-2">
+                      <ul className="space-y-1">
+                        {(mod.exercises ?? []).map((ex, exIdx) => {
+                          const isCurrentExercise =
+                            isCurrentModule &&
+                            exIdx === session.currentExerciseIndex;
+                          const isCompleted =
+                            modIdx < currentIndex ||
+                            (isCurrentModule &&
+                              exIdx < session.currentExerciseIndex);
 
-          {/* Skip Module Button */}
-          <SkipModuleButton />
+                          return (
+                            <li
+                              key={ex.id}
+                              className={`flex justify-between items-center gap-2 rounded-md px-2 py-1 ${
+                                isCurrentExercise
+                                  ? "text-primary font-semibold"
+                                  : isCompleted
+                                    ? "text-muted-foreground"
+                                    : ""
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                {isCompleted ? (
+                                  <CheckCircle className="text-green-500 w-4 h-4" />
+                                ) : (
+                                  <Circle className="text-muted-foreground w-4 h-4" />
+                                )}
+                                <span>{ex.name}</span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {formatMMSS(ex.computedDuration)}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </AccordionContent>
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
+
+            {/* Skip Module + Controls */}
+            <div className="flex flex-col gap-5 mt-6">
+              <SkipModuleButton moduleName={currentModule?.module ?? null} />
+              <Button onClick={handleFinish}>End Session</Button>
+            </div>
+          </Card>
         </div>
       </div>
 
@@ -164,13 +231,9 @@ export default function ActivePracticePage({
             </p>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => (isPaused ? resume() : pause())}
-            >
-              {isPaused ? "Resume" : "Pause"}
+            <Button variant="outline" onClick={handleExerciseControl}>
+              {exerciseButtonLabel}
             </Button>
-            <Button onClick={handleFinish}>End Session</Button>
           </div>
         </div>
 
@@ -212,18 +275,19 @@ function SkipExerciseButton() {
   const nextExercise = usePracticeStore((s) => s.nextExercise);
   const session = usePracticeStore((s) => s.session);
 
-  const canSkip =
+  const canSkip = !!session;
+
+  const isLastExercise =
     session &&
     session.currentModuleIndex < session.modules.length &&
-    session.modules[session.currentModuleIndex]?.exercises &&
-    session.currentExerciseIndex + 1 <
+    session.currentExerciseIndex + 1 >=
       session.modules[session.currentModuleIndex].exercises!.length;
 
   return (
     <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
       <DialogTrigger asChild>
         <Button variant="ghost" disabled={!canSkip}>
-          Skip →
+          Skip exercise→
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -241,11 +305,11 @@ function SkipExerciseButton() {
           <Button
             variant="destructive"
             onClick={() => {
-              nextExercise();
+              nextExercise(); // this will either go to next or finish module
               setShowConfirm(false);
             }}
           >
-            Confirm
+            {isLastExercise ? "Finish Module →" : "Skip Exercise →"}
           </Button>
         </div>
       </DialogContent>
@@ -253,20 +317,22 @@ function SkipExerciseButton() {
   );
 }
 
-function SkipModuleButton() {
+function SkipModuleButton({ moduleName }: { moduleName: string | null }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const finishModule = usePracticeStore((s) => s.finishModule);
+
+  const label = moduleName ? `Skip ${moduleName}` : "Skip Current Module";
 
   return (
     <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
       <DialogTrigger asChild>
-        <Button variant="secondary" className="w-full">
-          Skip Module
+        <Button variant="outline" className="w-full">
+          {label}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogTitle className="text-lg font-semibold">
-          Skip this module?
+          Skip {moduleName}?
         </DialogTitle>
         <DialogDescription className="text-sm text-muted-foreground mb-4">
           Are you sure you want to finish this module? You’ll move on and won’t
