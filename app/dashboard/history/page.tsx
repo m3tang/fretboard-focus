@@ -1,18 +1,21 @@
-"use client";
-
+// app/(dashboard)/practice-history/page.tsx
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { PracticeSessionListTable } from "./PracticeSessionListTable";
+import { fetchPracticeSessionsList } from "@/utils/data/fetchPracticeSessionList";
+import { getCurrentUserId } from "@/lib/auth";
 
-export default function PracticeHistoryPage() {
+export default async function PracticeHistoryPage() {
+  const userId = await getCurrentUserId();
+  const sessions = await fetchPracticeSessionsList(userId);
+
   return (
-    <div className="p-6">
+    <div>
       <DashboardHeader
         title="Practice History"
         subtitle="Review your past practice sessions and milestones."
       />
-
       <div className="mt-6">
-        {/* Session list, filters, and history charts will go here */}
-        <p className="text-muted-foreground">Practice history coming soon!</p>
+        <PracticeSessionListTable sessions={sessions} />
       </div>
     </div>
   );

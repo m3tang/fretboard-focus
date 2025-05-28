@@ -1,22 +1,8 @@
-export const dynamic = "force-dynamic";
-
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { ExerciseDialogWithList } from "./ExerciseDialogueWithList";
 import { fetchExercisesFromDb } from "@/utils/data/fetchExercises";
-import { Exercise } from "@/types/exercise";
-import { ExerciseList } from "@/components/dashboard/exercises/exercise-list"; // We'll extract the list to a client component
 
 export default async function DashboardExercisesPage() {
-  const exercisesFromDb: Exercise[] = await fetchExercisesFromDb(); // server fetch
+  const exercisesFromDb = await fetchExercisesFromDb();
 
-  return (
-    <div>
-      <DashboardHeader
-        title="Exercise Library"
-        subtitle="View and manage exercises used across your practice modules."
-      />
-
-      {/* pass exercises to a client component */}
-      <ExerciseList exercises={exercisesFromDb} />
-    </div>
-  );
+  return <ExerciseDialogWithList exercises={exercisesFromDb} />;
 }

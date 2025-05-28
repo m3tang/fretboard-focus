@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 
 function formatDuration(seconds: number) {
   const mins = Math.floor(seconds / 60);
@@ -17,9 +16,7 @@ export function PracticePreview() {
   const { session, setSession, startSession } = usePracticeStore();
   const router = useRouter();
 
-  const [duration, setDuration] = useState(
-    session ? Math.round(session.duration / 60) : 60
-  );
+  const duration = session ? Math.round(session.duration / 60) : 60;
 
   // Capture initial session only once to prevent circular updates
   const initialSessionRef = useRef(session);
@@ -49,9 +46,7 @@ export function PracticePreview() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{session.name}</h1>
-
-      {/* Duration Input */}
+      {/* Duration Input
       <div className="space-y-1">
         <label className="text-sm font-medium">Session Duration</label>
         <div className="flex items-center gap-2">
@@ -71,10 +66,34 @@ export function PracticePreview() {
           value={[duration]}
           onValueChange={(val) => setDuration(val[0])}
         />
-      </div>
+      </div> */}
+      <Card className="p-5">
+        <div className="flex flex-row justify-between">
+          <h1 className="text-2xl font-bold">{session.name}</h1>
 
-      <div>
-        <h2 className="text-lg font-semibold">Modules</h2>
+          <div className="flex gap-2 justify-end">
+            <Button
+              variant="outline"
+              onClick={() => {
+                usePracticeStore.getState().clearSession();
+              }}
+            >
+              Back
+            </Button>
+
+            <Button
+              onClick={() => {
+                const id = session.id;
+                startSession();
+                requestAnimationFrame(() => {
+                  router.push(`/dashboard/practice/active/${id}`);
+                });
+              }}
+            >
+              Start Session
+            </Button>
+          </div>
+        </div>
         <ul className="list-inside space-y-2">
           {session.modules.map((moduleObj) => {
             const exercises = moduleObj.exercises ?? [];
@@ -118,30 +137,7 @@ export function PracticePreview() {
             );
           })}
         </ul>
-      </div>
-
-      <div className="flex gap-2 justify-end">
-        <Button
-          variant="outline"
-          onClick={() => {
-            usePracticeStore.getState().clearSession();
-          }}
-        >
-          Back
-        </Button>
-
-        <Button
-          onClick={() => {
-            const id = session.id;
-            startSession();
-            requestAnimationFrame(() => {
-              router.push(`/dashboard/practice/active/${id}`);
-            });
-          }}
-        >
-          Start Session
-        </Button>
-      </div>
+      </Card>
     </div>
   );
 }

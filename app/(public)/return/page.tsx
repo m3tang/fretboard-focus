@@ -1,48 +1,42 @@
+// app/return/page.tsx
 import { redirect } from "next/navigation";
 import { stripe } from "@/lib/stripe";
 import { Stripe } from "stripe";
 
-// Define the expected props shape
-interface ReturnPageProps {
-  searchParams: { session_id?: string };
-}
+export default async function ReturnPage(props: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  const { session_id } = await props.searchParams;
 
-export default async function Return({ searchParams }: ReturnPageProps) {
-  const sessionId = searchParams.session_id;
-
-  if (!sessionId) {
-    throw new Error("Please provide a valid session_id (`cs_test_...`)");
+  if (!session_id) {
+    redirect("/");
   }
 
-  // Fetch session from Stripe
   const session: Stripe.Checkout.Session =
-    await stripe.checkout.sessions.retrieve(sessionId, {
+    await stripe.checkout.sessions.retrieve(session_id, {
       expand: ["line_items", "payment_intent"],
     });
 
   const { status, customer_details } = session;
 
-  if (status === "open") {
-    return redirect("/");
-  }
+  if (status === "open") redirect("/");
 
   if (status === "complete") {
-    const customerEmail = customer_details?.email ?? "your email";
-
     return (
-      <section id="success">
+      <section className="p-6">
+        <h1 className="text-2xl font-semibold">Payment Successful</h1>
         <p>
-          We appreciate your business! A confirmation email will be sent to{" "}
-          {customerEmail}. If you have any questions, please email{" "}
+          Thank you! A receipt was sent to{" "}
+          <strong>{customer_details?.email ?? "your email"}</strong>.
         </p>
-        <a href="mailto:orders@example.com">orders@example.com</a>.
       </section>
     );
   }
 
   return (
-    <section id="error">
-      <p>There was an issue processing your order. Please contact support.</p>
+    <section className="p-6">
+      <h1 className="text-2xl font-semibold">Payment Error</h1>
+      <p>Something went wrong. Please contact support.</p>
     </section>
   );
 }

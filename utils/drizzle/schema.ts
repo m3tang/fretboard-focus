@@ -9,12 +9,12 @@ import {
 
 // exercises table
 export const exercises = pgTable("exercises", {
-  id: text("id").primaryKey(),
+  id: uuid("id").primaryKey(), // ✅ match DB
   name: text("name").notNull(),
   description: text("description"),
   isCustom: boolean("is_custom").notNull().default(false),
-  modules: text("modules").array().notNull(), // TEXT[]
-  userId: uuid("user_id"), // nullable
+  modules: text("modules").array().notNull(),
+  userId: uuid("user_id"), // ✅ match DB
 });
 
 // routines table

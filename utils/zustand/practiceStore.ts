@@ -147,17 +147,15 @@ export const usePracticeStore = create<PracticeStore>()(
           currentExerciseState,
         } = get();
 
-        if (session && isActive && !isPaused) {
+        if (
+          session &&
+          isActive &&
+          !isPaused &&
+          currentExerciseState === "active"
+        ) {
           const newElapsed = elapsedSeconds + 1;
-          const updates: Partial<PracticeStore> = {
-            elapsedSeconds: newElapsed,
-          };
 
-          if (currentExerciseState === "not-started") {
-            updates.currentExerciseState = "active";
-          }
-
-          set(updates);
+          set({ elapsedSeconds: newElapsed });
 
           const currentIndex = currentModuleIndex();
           const currentExercise =

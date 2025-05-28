@@ -4,9 +4,10 @@ import { DashboardNav } from "@/components/dashboard/dashboard-nav";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { GuitarIcon, Menu } from "lucide-react";
+import { GuitarIcon, Menu, Settings } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function DashboardLayout({
   children,
@@ -41,11 +42,19 @@ export default function DashboardLayout({
         <div className="flex w-full flex-row justify-between items-center">
           <div>
             <Link href="/" className="flex items-center gap-2 md:gap-3">
-              <GuitarIcon className="h-6 w-6" />
+              <Image
+                src="/icon.svg" // must be in /public
+                alt="FretBook logo"
+                width={24}
+                height={24}
+                priority
+              />
               <span className="text-lg font-bold">FretBook</span>
             </Link>
           </div>
-          <Link href="/dashboard/settings">Settings</Link>
+          <Link className="font-medium" href="/dashboard/settings">
+            <Settings className="w-4 h-4 text-muted-foreground" />
+          </Link>
         </div>
       </header>
 
@@ -59,7 +68,7 @@ export default function DashboardLayout({
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 md:ml-[220px] bg-muted/40 p-5">{children}</main>
+        <main className="flex-1 md:ml-[220px] bg-muted/40 p-8">{children}</main>
       </div>
     </div>
   );

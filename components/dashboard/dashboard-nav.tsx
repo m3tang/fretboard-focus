@@ -6,13 +6,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   AlarmClock,
-  BarChart3,
   DumbbellIcon,
   History,
   LayoutDashboard,
   Music,
   Repeat,
-  Target,
 } from "lucide-react";
 import { usePracticeStore } from "@/utils/zustand/practiceStore";
 import { useEffect, useState } from "react";
@@ -73,7 +71,7 @@ export function DashboardNav() {
       {/* Primary Links - no header */}
       <div className="space-y-1 mb-6">
         <NavItem
-          title="Overview"
+          title="Home"
           href="/dashboard"
           icon={<LayoutDashboard className="mr-2 h-4 w-4" />}
           activePath={pathname}
@@ -95,12 +93,6 @@ export function DashboardNav() {
       {/* Practice & Library */}
       <NavSection title="Library">
         <NavItem
-          title="Practice Areas"
-          href="/dashboard/practice-areas"
-          icon={<Target className="mr-2 h-4 w-4" />}
-          activePath={pathname}
-        />
-        <NavItem
           title="Exercises"
           href="/dashboard/exercises"
           icon={<DumbbellIcon className="mr-2 h-4 w-4" />}
@@ -117,21 +109,9 @@ export function DashboardNav() {
       {/* Progress */}
       <NavSection title="Progress">
         <NavItem
-          title="Progress"
-          href="/dashboard/progress"
-          icon={<BarChart3 className="mr-2 h-4 w-4" />}
-          activePath={pathname}
-        />
-        <NavItem
           title="Practice History"
           href="/dashboard/history"
           icon={<History className="mr-2 h-4 w-4" />}
-          activePath={pathname}
-        />
-        <NavItem
-          title="Goals"
-          href="/dashboard/goals"
-          icon={<Target className="mr-2 h-4 w-4" />}
           activePath={pathname}
         />
       </NavSection>

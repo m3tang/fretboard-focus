@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function AccountPage() {
   return (
     <div className="space-y-5">
-      <DashboardHeader title="Settings" subtitle="Put settings here" />
+      <DashboardHeader title="Settings" />
       <Link href="/dashboard/settings/reset-password">
         <Button>Reset Password</Button>
       </Link>

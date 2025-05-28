@@ -10,6 +10,7 @@ interface ExerciseStore {
   deleteExercise: (id: string) => void;
   getExerciseById: (id: string) => Exercise | undefined;
   initDefaultExercises: (exercisesFromDb: Exercise[]) => void; // ← correct now
+  refreshExercises: () => Promise<void>;
 }
 
 export const useExerciseStore = create<ExerciseStore>()(
@@ -47,6 +48,11 @@ export const useExerciseStore = create<ExerciseStore>()(
             initialized: true,
           });
         }
+      },
+      refreshExercises: async () => {
+        const res = await fetch("/api/exercises");
+        const data = await res.json();
+        set({ exercises: data });
       },
     }),
     {

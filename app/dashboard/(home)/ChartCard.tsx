@@ -26,49 +26,83 @@ import {
 } from "recharts";
 import { TrendingUp } from "lucide-react";
 
-const pieChartData = [
-  { name: "Warmup", duration: 75, fill: "hsl(var(--chart-1))" },
-  { name: "Scales", duration: 15, fill: "hsl(var(--chart-2))" },
-  { name: "Technique", duration: 20, fill: "hsl(var(--chart-3))" },
-  { name: "Chords", duration: 25, fill: "hsl(var(--chart-4))" },
-  { name: "Improvisation", duration: 15, fill: "hsl(var(--chart-5))" },
-  { name: "Songs", duration: 10, fill: "hsl(var(--chart-6))" },
-];
+interface ChartCardProps {
+  pieChartData: {
+    name: string;
+    duration: number; // in seconds
+    fill: string;
+  }[];
+  graphData: {
+    day: string;
+    [key: string]: number | string; // durations in seconds
+  }[];
+  totalSeconds: number;
+}
 
-const graphData = [
-  { day: "Mon", Warmup: 10, Scales: 5 },
-  { day: "Tue", Warmup: 15, Chords: 10 },
-  { day: "Wed", Technique: 20 },
-  { day: "Thu", Scales: 10, Improvisation: 15 },
-  { day: "Fri", Warmup: 5, Songs: 10 },
-  { day: "Sat", Warmup: 0 },
-  { day: "Sun", Warmup: 20, Chords: 15 },
-];
+// Helper to format seconds to Xh Ym
+function formatDuration(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  return `${hours > 0 ? `${hours}h ` : ""}${minutes}min`;
+}
 
-const colorMap: Record<string, string> = pieChartData.reduce(
-  (acc, mod) => {
-    acc[mod.name] = mod.fill;
-    return acc;
-  },
-  {} as Record<string, string>
-);
-
-export default function ChartCard() {
-  const totalMinutes = pieChartData.reduce(
-    (sum, item) => sum + item.duration,
-    0
+export default function ChartCard({
+  pieChartData,
+  graphData,
+  totalSeconds,
+}: ChartCardProps) {
+  const colorMap: Record<string, string> = pieChartData.reduce(
+    (acc, mod) => {
+      acc[mod.name] = mod.fill;
+      return acc;
+    },
+    {} as Record<string, string>
   );
+
+  // Pre-transform graphData to convert all durations from seconds → minutes
+  const graphDataInMinutes = graphData.map((row) => {
+    const newRow: Record<string, string | number> = { day: row.day };
+    for (const key in row) {
+      if (key !== "day") {
+        const seconds = row[key];
+        newRow[key] =
+          typeof seconds === "number" ? Math.floor(seconds / 60) : seconds;
+      }
+    }
+    return newRow;
+  });
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
+      <CardHeader>
         <CardTitle>Practice Breakdown</CardTitle>
         <CardDescription>Last 7 Days by Module</CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-col md:flex-row-reverse gap-6 items-start py-8">
+      <CardContent className="flex flex-col md:flex-row gap-6 items-start py-8">
+        {/* Bar Chart */}
+        <div className="w-2/3 h-[300px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={graphDataInMinutes}>
+              <XAxis dataKey="day" stroke="#888" />
+              <YAxis
+                stroke="#888"
+                label={{ value: "Minutes", angle: -90, position: "insideLeft" }}
+              />
+              <Tooltip />
+              {pieChartData.map((mod) => (
+                <Bar
+                  key={mod.name}
+                  dataKey={mod.name}
+                  stackId="a"
+                  fill={colorMap[mod.name]}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
         {/* Pie Chart */}
-        <div className="flex-1 h-[300px] flex items-center justify-center">
+        <div className="w-1/3 h-[300px] flex items-center justify-center">
           <ChartContainer config={{}} className="h-full w-full">
             <PieChart>
               <ChartTooltip
@@ -97,7 +131,7 @@ export default function ChartCard() {
                             y={viewBox.cy}
                             className="fill-foreground text-2xl font-bold"
                           >
-                            {totalMinutes} min
+                            {formatDuration(totalSeconds)}
                           </tspan>
                           <tspan
                             x={viewBox.cx}
@@ -114,25 +148,6 @@ export default function ChartCard() {
               </Pie>
             </PieChart>
           </ChartContainer>
-        </div>
-
-        {/* Bar Chart */}
-        <div className="flex-1 h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={graphData}>
-              <XAxis dataKey="day" stroke="#888" />
-              <YAxis stroke="#888" />
-              <Tooltip />
-              {pieChartData.map((mod) => (
-                <Bar
-                  key={mod.name}
-                  dataKey={mod.name}
-                  stackId="a"
-                  fill={colorMap[mod.name]}
-                />
-              ))}
-            </BarChart>
-          </ResponsiveContainer>
         </div>
       </CardContent>
 

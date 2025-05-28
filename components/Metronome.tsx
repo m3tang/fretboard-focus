@@ -12,6 +12,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Play, StopCircle, Loader2 } from "lucide-react";
 
 const Metronome = () => {
   const {
@@ -26,9 +27,20 @@ const Metronome = () => {
   } = useMetronome();
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold">Metronome</CardTitle>
+    <Card className="w-full">
+      <CardHeader className="flex flex-row justify-between">
+        <CardTitle className="text-lg font-bold">Metronome</CardTitle>
+        {/* Beat Indicators */}
+        <div className="flex justify-center gap-2 mt-4">
+          {Array.from({ length: beatsPerMeasure }).map((_, i) => (
+            <div
+              key={i}
+              className={`w-4 h-4 rounded-full transition-all duration-150 ${
+                count === i && isPlaying ? "bg-blue-600 scale-125" : "bg-muted"
+              }`}
+            />
+          ))}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Controls */}
@@ -36,9 +48,22 @@ const Metronome = () => {
           <Button
             onClick={handleStartStop}
             disabled={isLoading}
-            className={isPlaying ? "bg-red-500 hover:bg-red-600" : ""}
+            className={`text-white transition
+    ${isLoading ? "opacity-50 cursor-not-allowed" : ""}
+    ${
+      isPlaying
+        ? "bg-muted hover:bg-muted/80 text-foreground"
+        : "bg-primary hover:bg-primary/90"
+    }
+  `}
           >
-            {isLoading ? "Loading..." : isPlaying ? "Stop" : "Start"}
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : isPlaying ? (
+              <StopCircle className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
           </Button>
 
           {/* BPM Slider */}
@@ -73,18 +98,6 @@ const Metronome = () => {
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        {/* Beat Indicators */}
-        <div className="flex justify-center gap-2 mt-4">
-          {Array.from({ length: beatsPerMeasure }).map((_, i) => (
-            <div
-              key={i}
-              className={`w-4 h-4 rounded-full transition-all duration-150 ${
-                count === i && isPlaying ? "bg-blue-600 scale-125" : "bg-muted"
-              }`}
-            />
-          ))}
         </div>
       </CardContent>
     </Card>
